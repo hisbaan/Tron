@@ -8,7 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class Tron implements ActionListener, KeyListener, WindowListener{
+public class Tron implements ActionListener, KeyListener, WindowListener {
     JFrame mainMenuFrame = new JFrame("Main Menu");
     JPanel mainMenuBottomPannel = new JPanel();
     JButton startGameButton = new JButton("Star Game");
@@ -17,10 +17,12 @@ public class Tron implements ActionListener, KeyListener, WindowListener{
     JPanel gameBottomPannel = new JPanel();
     JButton gameBackButton = new JButton("Back");
     Drawing board = new Drawing();
-    
-    char direction1 = 'e';
-    char direction2 = 'w';
-    
+
+    String winner = "";
+
+    char direction1 = 'w';
+    char direction2 = 'e';
+
     static int[][][] position = new int[50][50][2];
 
     Timer movement;
@@ -34,6 +36,7 @@ public class Tron implements ActionListener, KeyListener, WindowListener{
             board.validate();
             board.repaint();
             move();
+            collisionDetection();
         });
 
         mainMenu();
@@ -75,8 +78,8 @@ public class Tron implements ActionListener, KeyListener, WindowListener{
         gameFrame.setFocusable(true);
         gameFrame.add(board, BorderLayout.CENTER);
 
-        position[0][24][0] = 2;
-        position[49][24][1] = 2;
+        position[0][24][1] = 2;
+        position[49][24][0] = 2;
 
 
         movement.start();
@@ -86,7 +89,98 @@ public class Tron implements ActionListener, KeyListener, WindowListener{
     }
 
     public void resetGame() {
+        for (int y = 0; y < 50; y++) {
+            for (int x = 0; x < 50; x++) {
+                position[x][y][0] = 0;
+                position[x][y][1] = 0;
+            }
+        }
 
+        position[0][24][1] = 2;
+        position[49][24][0] = 2;
+
+        direction1 = 'w';
+        direction2 = 'e';
+
+        movement.stop();
+    }
+
+    public void collisionDetection() {
+        try {
+            for (int y = 0; y < 50; y++) {
+                for (int x = 0; x < 50; x++) {
+                    if (direction1 == 'n') {
+                        if (position[x][y][0] == 2 && position[x][y - 1][0] == 1) {
+                            orangeWins();
+                        }
+                        if (position[x][y][0] == 1 && position[x][y - 1][1] == 1) {
+                            orangeWins();
+                        }
+
+                        if (position[x][y][1] == 2 && position[x][y - 1][1] == 1) {
+                            blueWins();
+                        }
+                        if (position[x][y][1] == 1 && position[x][y - 1][0] == 1) {
+                            blueWins();
+                        }
+                    }
+                    if (direction1 == 's') {
+                        if (position[x][y][0] == 2 && position[x][y + 1][0] == 1) {
+                            orangeWins();
+                        }
+                        if (position[x][y][0] == 1 && position[x][y + 1][1] == 1) {
+                            orangeWins();
+                        }
+                        if (position[x][y][1] == 2 && position[x][y + 1][1] == 1) {
+                            blueWins();
+                        }
+                        if (position[x][y][1] == 1 && position[x][y + 1][0] == 1) {
+                            blueWins();
+                        }
+                    }
+                    if (direction1 == 'e') {
+                        if (position[x][y][0] == 2 && position[x + 1][y][0] == 1) {
+                            orangeWins();
+                        }
+                        if (position[x][y][0] == 1 && position[x + 1][y][1] == 1) {
+                            orangeWins();
+                        }
+                        if (position[x][y][1] == 2 && position[x + 1][y][1] == 1) {
+                            blueWins();
+                        }
+                        if (position[x][y][1] == 1 && position[x + 1][y][0] == 1) {
+                            blueWins();
+                        }
+                    }
+                    if (direction1 == 'w') {
+                        if (position[x][y][0] == 2 && position[x - 1][y][0] == 1) {
+                            orangeWins();
+                        }
+                        if (position[x][y][0] == 1 && position[x - 1][y][1] == 1) {
+                            orangeWins();
+                        }
+                        if (position[x][y][1] == 2 && position[x - 1][y][1] == 1) {
+                            blueWins();
+                        }
+                        if (position[x][y][1] == 1 && position[x - 1][y][0] == 1) {
+                            blueWins();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void orangeWins() {
+        winner = "Orange";
+        gameOver();
+    }
+
+    public void blueWins() {
+        winner = "Blue";
+        gameOver();
     }
 
     public void move() {
@@ -125,7 +219,7 @@ public class Tron implements ActionListener, KeyListener, WindowListener{
                     break;
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            gameOver();
+//            gameOver();
         }
     }
 
@@ -180,17 +274,20 @@ public class Tron implements ActionListener, KeyListener, WindowListener{
             }
         }
     }
-    
+
     public void gameOver() {
-        
+        JOptionPane.showMessageDialog(gameFrame, "Game Over\n" + winner + " wins!", "Game Over", JOptionPane.PLAIN_MESSAGE, null);
+        resetGame();
+        mainMenu();
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == startGameButton) {
             startGame();
         }
         if (e.getSource() == gameBackButton) {
+            resetGame();
             movement.stop();
             mainMenu();
         }
